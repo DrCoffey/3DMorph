@@ -201,7 +201,7 @@ for i = 1:numObj %Evaluate all connected components in PixelIdxList.
     if  numel(ConnectedComponents.PixelIdxList{1,i}) > CellSizeCutoff %If the size of the current connected component is greater than our predefined cutoff value, segment it.
         ex=zeros(s(1),s(2),zs);%Create blank image of correct size.
         ex(ConnectedComponents.PixelIdxList{1,i})=1;%write object onto blank array so only the cell pixels = 1.
-        se=strel('diamond',6); %Set how much, and what shape, we want to erode by. If increase, erosion will be greater.
+        se=strel('diamond',2); %Set how much, and what shape, we want to erode by. If increase, erosion will be greater.
         nucmask=imerode(ex,se);%Erode to find nuclei only. This erosion is large - don't want any remaining thick branch pieces.
         nucsize = round((CellSizeCutoff/50),0);
         nucmask=bwareaopen(nucmask,nucsize);%Get rid of leftover tiny spots. Increase second input argument to remove more spots (and decrease segmentation)
@@ -655,7 +655,7 @@ parfor i=1:numel(FullMg)
         lighting gouraud; %Set style of lighting. This allows contours, instead of flat lighting
         view(0,270); % Look at image from top viewpoint instead of side  
         daspect([1 1 1]);
-        filename = ([file '_Original_cell' num2str(i)]);
+        filename = ([file '_Original_cell' num2str(i) '.jpg']);
         saveas(gcf, fullfile(fpath, filename), 'jpg');
     end
     
@@ -765,7 +765,7 @@ parfor i=1:numel(FullMg)
     view(0,270); % Look at image from top viewpoint instead of side
     daspect([1 1 1]);
     hold off
-    filename = ([file '_Skeleton_cell' num2str(i)]);
+    filename = ([file '_Skeleton_cell' num2str(i) '.jpg']);
     saveas(gcf, fullfile(fpath, filename), 'jpg');
     end
     
@@ -807,7 +807,7 @@ parfor i=1:numel(FullMg)
         lighting gouraud; %Set style of lighting. This allows contours, instead of flat lighting
         view(0,270);
         daspect([1 1 1]);
-        filename = ([file '_Endpoints_cell' num2str(i)]);
+        filename = ([file '_Endpoints_cell' num2str(i) '.jpg']);
         saveas(gcf, fullfile(fpath, filename), 'jpg');
     end
     
@@ -825,7 +825,7 @@ parfor i=1:numel(FullMg)
         lighting gouraud; %Set style of lighting. This allows contours, instead of flat lighting
         view(0,270);
         daspect([1 1 1]);
-        filename = ([file '_Branchpoints_cell' num2str(i)]);
+        filename = ([file '_Branchpoints_cell' num2str(i) '.jpg']);
         saveas(gcf, fullfile(fpath, filename), 'jpg');
     end
         
@@ -883,6 +883,11 @@ xlswrite((strcat('Results',file)),{'MaxBranchLength'},1,'P1');
 xlswrite((strcat('Results',file)),MaxBranchLength(:,1),1,'Q');
 xlswrite((strcat('Results',file)),{'MinBranchLength'},1,'R1');
 xlswrite((strcat('Results',file)),MinBranchLength(:,1),1,'S');
+
+t=table(FullCellTerritoryVol,CellVolume,FullCellComplexity,numendpts...
+    ,numbranchpts,AvgBranchLength,MaxBranchLength,MinBranchLength);
+
+writetable(t,['Results_' file '.xlsx']);
 
 if Interactive == 2
 disp(['Finished file ' num2str(total) ' of ' num2str(numel(FileList))]);
